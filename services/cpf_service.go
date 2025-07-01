@@ -10,21 +10,22 @@ import (
 func ValidadorCpf(e models.CpfEntrada) (models.CpfResultado, error) {
 	err := verifyFormat(e.Cpf)
 	if err != nil {
-		return models.CpfResultado{}, err
+		return models.CpfResultado{Validade: "Inválido"}, err
 	}
 
 	cpf, err := removeCharacters(e.Cpf)
 	if err != nil {
-		return models.CpfResultado{}, err
+		return models.CpfResultado{Validade: "Inválido"}, err
 	}
 
 	PrimeiraOrdemValidade, err := calculateValidationDigit(cpf[0:9], cpf[9:], 1)
 	if err != nil {
-		return models.CpfResultado{}, err
+		return models.CpfResultado{Validade: "Inválido"}, err
 	}
+
 	SegundaOrdemValidade, err := calculateValidationDigit(cpf[0:10], cpf[10:], 2)
 	if err != nil {
-		return models.CpfResultado{}, err
+		return models.CpfResultado{Validade: "Inválido"}, err
 	}
 
 	if PrimeiraOrdemValidade && SegundaOrdemValidade {
@@ -33,11 +34,11 @@ func ValidadorCpf(e models.CpfEntrada) (models.CpfResultado, error) {
 		}, nil
 	}
 
-	return models.CpfResultado{}, errors.New("cpf inválido")
+	return models.CpfResultado{Validade: "Inválido"}, errors.New("cpf inválido")
 }
 
 func verifyFormat(cpf string) error {
-	re := regexp.MustCompile(`([0-9]{3}[\.]?[0-9]{3}[\.]?[0-9]{3}[-]?[0-9]{2})`)
+	re := regexp.MustCompile(`^\d{3}\.?\d{3}\.?\d{3}-?\d{2}$`)
 	validade := re.MatchString(cpf)
 
 	if validade {
@@ -51,7 +52,7 @@ func removeCharacters(cpf string) (string, error) {
 	re := regexp.MustCompile("[0-9]+")
 	digits := re.FindAllString(cpf, -1)
 	cpfValido := ""
-	
+
 	for _, d := range digits {
 		cpfValido += d
 	}
